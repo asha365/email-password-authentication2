@@ -13,6 +13,7 @@ function App() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [validated, setValidated] = useState(false);
+  const [registered, setRegistered] = useState(false);
 
   
 
@@ -22,6 +23,10 @@ function App() {
   
   const handlePasswordBlur = (event) =>{
     setPassword(event.target.value);
+  }
+
+  const handleRegisteredChange = (event) =>{
+    setRegistered(event.target.checked);
   }
 
   const handleFormSubmit = (event) =>{
@@ -61,7 +66,7 @@ function App() {
   return (
     <div>
       <div className="registration w-50 mx-auto mt-5">
-        <h1 className='text-info'>Please Register!!</h1>
+        <h1 className='text-info'>Please {registered ? 'Login' : 'Register'}!!</h1>
 
       <Form noValidate validated={validated} onSubmit={handleFormSubmit}>
       <Form.Group className="mb-3" controlId="formBasicEmail">
@@ -84,10 +89,10 @@ function App() {
           </Form.Control.Feedback>
       </Form.Group>
       <Form.Group className="mb-3" controlId="formBasicCheckbox">
-        <Form.Check type="checkbox" label="Check me out" />
+        <Form.Check onChange={handleRegisteredChange} type="checkbox" label="Check me out" />
       </Form.Group>
       <Button variant="primary" type="submit">
-        Submit
+        {registered ? 'Login' : 'Register'}
       </Button>
     </Form>
       </div>
