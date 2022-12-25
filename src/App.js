@@ -1,5 +1,5 @@
 import './App.css';
-import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
+import { createUserWithEmailAndPassword, getAuth, sendEmailVerification, sendPasswordResetEmail, signInWithEmailAndPassword } from "firebase/auth";
 import app from './firebase.init';
 import { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -30,7 +30,20 @@ function App() {
   }
 
   const handleFormSubmit = (event) =>{
-    const form = event.currentTarget;
+    
+    if(registered){
+      signInWithEmailAndPassword(auth, email, password)
+      .then((result) =>{
+        const user = result.user;
+        console.log(user);
+      })
+      .catch((error) =>{
+        console.error(error);
+        setError(error.message);
+      })
+    }
+    else{
+      const form = event.currentTarget;
     if (form.checkValidity() === false) {
       event.preventDefault();
       event.stopPropagation();
@@ -53,14 +66,32 @@ function App() {
       setPassword(user);
       setEmail('');
       setPassword('');
+      EmailVerification();
 
     })
     .catch((error) =>{
       console.error(error);
       setError(error.message);
     })
+    }
     event.preventDefault();
   }
+
+  const EmailVerification = () =>{
+    sendEmailVerification(auth.currentUser)
+      .then(() =>{
+        console.log('email verification sent');
+      })
+  }
+
+//forget password
+const handlePasswordReset = () =>{
+  sendPasswordResetEmail(auth, email)
+  .then(() =>{
+    console.log('email sent');
+  })
+  
+}
 
 
   return (
@@ -83,7 +114,7 @@ function App() {
       <Form.Group className="mb-3" controlId="formBasicPassword">
         <Form.Label>Password</Form.Label>
         <Form.Control onBlur={handlePasswordBlur} type="password" placeholder="Password" required/>
-        <p className='text-danger'>{error}</p>
+        
         <Form.Control.Feedback type="invalid">
             Please provide a valid password.
           </Form.Control.Feedback>
@@ -91,6 +122,9 @@ function App() {
       <Form.Group className="mb-3" controlId="formBasicCheckbox">
         <Form.Check onChange={handleRegisteredChange} type="checkbox" label="Check me out" />
       </Form.Group>
+      <p className='text-danger'>{error}</p>
+      <Button onClick={handlePasswordReset} variant="link">Forget Password?</Button>
+      <br/>
       <Button variant="primary" type="submit">
         {registered ? 'Login' : 'Register'}
       </Button>
