@@ -13,6 +13,7 @@ function App() {
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [validated, setValidated] = useState(false);
   const [registered, setRegistered] = useState(false);
 
@@ -35,6 +36,21 @@ function App() {
 
 
   const handleFormSubmit = (event) =>{
+    event.preventDefault();
+    const form = event.currentTarget;
+
+    if (form.checkValidity() === false) {
+      event.stopPropagation();
+      return;
+    }
+
+    if(!/(?=.[!@#$%^&*()_+}{":;'?/>.<,])/.test(password)){
+      setError('please password should contain at least one special character');
+      return;
+    }
+    setValidated(true);
+    setError('');
+    setSuccess('');
     
     if(registered){
       signInWithEmailAndPassword(auth, email, password)
@@ -47,38 +63,24 @@ function App() {
         setError(error.message);
       })
     }
+
     else{
-      const form = event.currentTarget;
-    if (form.checkValidity() === false) {
-      event.preventDefault();
-      event.stopPropagation();
+        createUserWithEmailAndPassword(auth, email, password)
+        .then((result) => {
+        const user = result.user;
+        console.log(user);
+        setEmail('');
+        setPassword('');
+        EmailVerification();
+        setUserName();
+        setSuccess('Successfully submitted');
+
+      })
       
-      return;
-    }
-
-    if(!/(?=.[!@#$%^&*()_+}{":;'?/>.<,])/.test(password)){
-      setError('please password should contain at least one special character');
-      return;
-    }
-    setValidated(true);
-    setError('');
-
-    createUserWithEmailAndPassword(auth, email, password)
-    .then((result) => {
-      const user = result.user;
-      console.log(user);
-      setEmail(user);
-      setPassword(user);
-      setEmail('');
-      setPassword('');
-      EmailVerification();
-      setUserName();
-
-    })
-    .catch((error) =>{
-      console.error(error);
-      setError(error.message);
-    })
+      .catch((error) =>{
+        console.error(error);
+        setError(error.message);
+      })
     }
     event.preventDefault();
   }
@@ -90,14 +92,7 @@ function App() {
       })
   }
 
-  const setUserName = () =>{
-    updateProfile(auth.currentUser, {
-      displayName: name
-    })
-    .catch((error) =>{
-      setError(error.message);
-    })
-  }
+  
 
 //forget password
 const handlePasswordReset = () =>{
@@ -105,13 +100,22 @@ const handlePasswordReset = () =>{
   .then(() =>{
     console.log('email sent');
   })
-  
+}
+
+const setUserName = () =>{
+  updateProfile(auth.currentUser, {
+    displayName: name
+  })
+  .catch((error) =>{
+    setError(error.message);
+  })
 }
 
 
   return (
     <div>
       <div className="registration w-50 mx-auto mt-5">
+      <p className='text-success'>{success}</p>
         <h1 className='text-info'>Please {registered ? 'Login' : 'Register'}!!</h1>
 
       <Form noValidate validated={validated} onSubmit={handleFormSubmit}>
